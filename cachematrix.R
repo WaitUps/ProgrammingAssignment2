@@ -1,10 +1,60 @@
-## [Put comments here that describe what your functions do]
+## These functions create a special object that stores a matrix 
+## and caches its inverse so that it does not need to be 
+## recalculated repeatedly.
+
+## This function creates a special "matrix" object, which is 
+## actually a list containing functions to set and get the matrix, 
+## and set and get its inverse.
 
 makeCacheMatrix <- function(x = matrix()) {
-
+        # 'inv' will store the cached inverse matrix, initialized to NULL
+        inv <- NULL
+        
+        # Method to set a new matrix value and reset the cache
+        set <- function(y) {
+                x <<- y
+                inv <<- NULL
+        }
+        
+        # Method to get the current matrix
+        get <- function() x
+        
+        # Method to set the inverse matrix in the parent environment
+        setinverse <- function(inverse) inv <<- inverse
+        
+        # Method to get the cached inverse matrix
+        getinverse <- function() inv
+        
+        # Return a list of all the methods
+        list(set = set, get = get,
+             setinverse = setinverse,
+             getinverse = getinverse)
 }
 
 
+## This function computes the inverse of the special "matrix" 
+## returned by makeCacheMatrix. If the inverse has already 
+## been calculated, it retrieves it from the cache.
+
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+        # Attempt to get the cached inverse
+        inv <- x$getinverse()
+        
+        # If the cache is not empty, return the cached inverse matrix
+        if(!is.null(inv)) {
+                message("getting cached data")
+                return(inv)
+        }
+        
+        # If the cache is empty, get the matrix data
+        data <- x$get()
+        
+        # Calculate the inverse using R's built-in solve() function
+        inv <- solve(data, ...)
+        
+        # Store the calculated inverse in the cache
+        x$setinverse(inv)
+        
+        # Return the inverse matrix
+        inv
 }
